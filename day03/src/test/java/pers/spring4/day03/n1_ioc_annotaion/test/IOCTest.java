@@ -4,19 +4,18 @@ import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import pers.spring4.day03.n1_ioc_annotaion.service.BookService;
+import pers.spring4.day03.n1_ioc_annotaion.service.EmployeeService;
 import pers.spring4.day03.n1_ioc_annotaion.service.UserService;
 
 
 public class IOCTest {
 	
-	
+	private ApplicationContext applicationContext = new ClassPathXmlApplicationContext("springconfig_n1.xml");
 
 	@Test
 	public void test() {
-		
-		ApplicationContext ioc = new ClassPathXmlApplicationContext("springconfig_n1.xml");
-		BookService bookService = ioc.getBean(BookService.class);
-		UserService userService = ioc.getBean(UserService.class);
+		BookService bookService = applicationContext.getBean(BookService.class);
+		UserService userService = applicationContext.getBean(UserService.class);
 		
 		bookService.save();
 		userService.save();
@@ -46,6 +45,12 @@ public class IOCTest {
 		//    3、看方法注释；
 		//  学到的一点：1）、规范注释，   2）、规范方法名和类名;
 
-		((ClassPathXmlApplicationContext)ioc).close();
+		((ClassPathXmlApplicationContext)applicationContext).close();
+	}
+
+	@Test
+	public void testIocAnno(){
+		EmployeeService employeeService = applicationContext.getBean("employeeService",EmployeeService.class);
+		employeeService.add();
 	}
 }
