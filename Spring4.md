@@ -1799,7 +1799,87 @@
 3. 例子
    1. 我们希望的是
       1. 业务逻辑：（核心功能）；日志模块；在核心功能运行期间，自己动态的加上
+
       2. 运行的时候，日志功能可以加上
+
+      3. 可以使用动态代理来将日志代码动态的在目标方法执行前后先进行执行
+
+         * 被代理类
+
+           * ```java
+             //接口
+             package pers.spring4.day03.n2_aop.inter;
+             
+             public interface Calculator {
+                 Double getSum(Double a,Double b);
+             }
+             ```
+
+           * ```java
+             //bean
+             public class CalculatorImpl implements Calculator{
+                 @Override
+                 public Double getSum(Double a, Double b) {
+                     System.out.println("CalculatorImpl getSum");
+                     // TODO Auto-generated method stub
+                     return a + b;
+                 }
+             }
+             ```
+
+         * 代理类
+
+           * ```java
+             public class CalculatorProxy {
+                 public static<T> T getProxy(final T obj){
+                     //方法执行器帮我们的目标对象执行目标方法
+                     InvocationHandler ih = new InvocationHandler(){
+                         /**
+                          * @param proxy 代理对象
+                          * @param method 当前将要执行的目标对象的方法
+                          * @param args 目标方法调用时传入的参数
+                          */
+                         @Override
+                         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                             Object result = null;
+                             try {
+                                 System.out.println("前置通知");
+                                 //利用反射执行目标方法
+                                 //目标方法执行后的返回值
+                                 result = method.invoke(obj, args);
+                                 System.out.println("后置通知");
+                             } catch (Exception e) {
+                                 //TODO: handle exception
+                                 e.printStackTrace();
+                                 System.out.println("异常通知");
+                             }finally{
+                                 System.out.println("最终通知");
+                             }
+                             return result;
+                         }
+                     };
+                     Class<?>[] interfaces = obj.getClass().getInterfaces();
+                     ClassLoader classLoader = obj.getClass().getClassLoader();
+             
+                     //创建代理对象
+                     Object proxy = Proxy.newProxyInstance(classLoader, interfaces, ih);
+                     return (T)proxy;
+                 }
+             }
+             ```
+
+         * 测试
+
+           * ```java
+             public class AopTest {
+                 @Test
+                 public void testProxy(){
+                     Calculator proxy = CalculatorProxy.getProxy(new CalculatorImpl());
+                     Double sum = proxy.getSum(1.0, 2.0);
+                     System.out.println(sum);
+                 }
+             }
+             ```
 
 ## 2.底层原理
 
@@ -1900,27 +1980,35 @@
 
 ## 4.术语
 
-### 1.连接点
+### 1.横切关注点
 
-* 类里面哪些方法可以被增强,这些方法称为连接点
+* 从每个方法中抽取出来的同一类非核心业务
 
-### 2.切入点
+### 2.切面(Aspect)
 
-* 实际被真正增强的方法,称为切入点
+* 封装横切关注点信息的类，每个关注点体现为一个通知方法
 
-### 3.通知（增强）
+### 3.通知(Advice)
 
 1. 实际增强的逻辑部分称为通知(增强)
 2. 通知有多种类型
-   1. 前置通知
-   2. 后置通知
-   3. 环绕通知
-   4. 异常通知
-   5. 最终通知
+   1. @Before: 前置通知, 在方法执行之前执行
+   2. @After: 后置通知, 在方法执行之后执行 。
+   3. @AfterRunning: 返回通知, 在方法返回结果之后执行
+   4. @AfterThrowing: 异常通知, 在方法抛出异常之后
+   5. @Around: 环绕通知, 围绕着方法执行
 
-### 4.切面
+### 4.目标(Target)
 
-* 是动作,把通知应用到切入点的过程
+* 被通知的对象
+
+### 5.代理(Proxy)
+
+* 向目标对象应用通知之后创建的代理对象
+
+### 6.连接点(Joinpoint)
+
+* 横切关注点在程序代码中的具体体现，对应程序执行的某个特定位置。例如：类某个方法调用前、调用后、方法捕获到异常后等
 
 ## 5.准备工作
 
@@ -1934,6 +2022,15 @@
 2. 基于注解方式实现（经常使用）
 
 ### 3.在项目工程里面引入 AOP 相关依赖
+
+* 导入JAR包
+  * aopalliance.jar
+  * aspectj.weaver.jar
+  * spring-aspects.jar
+* 引入aop名称空间
+* 配置
+  * `<aop:aspectj-autoproxy>`
+  * 当Spring IOC容器侦测到bean配置文件中的`<aop:aspectj-autoproxy>`元素时，会自动为与AspectJ切面匹配的bean创建代理
 
 ### 4.切入点表达式
 
@@ -1997,9 +2094,12 @@
 ### 1.创建类，在类里面定义方法
 
 * ```java
-  public class User {
-      public void add(){
-          System.out.println("add...");
+  public class CalculatorImpl implements Calculator{
+      @Override
+      public Double getSum(Double a, Double b) {
+          System.out.println("CalculatorImpl getSum");
+          // TODO Auto-generated method stub
+          return a + b;
       }
   }
   ```
@@ -2009,9 +2109,9 @@
 #### 1.在增强类里面，创建方法，让不同方法代表不同通知类型
 
 * ```java
-  public class UserProxy {
-      public void before(){
-          System.out.println("before...");
+  public class CalculatorAopProxy {
+      public void before(JoinPoint joinPoint){
+          System.out.println("前置通知: " + joinPoint);
       }
   }
   ```
@@ -2039,9 +2139,9 @@
 
 * ```java
   @Component
-  public class UserProxy {}
+  public class CalculatorImpl {}
   @Component
-  public class User {}
+  public class CalculatorAopProxy {}
   ```
 
 #### 3.在增强类上面添加注解 @Aspect
@@ -2049,7 +2149,7 @@
 * ```java
   @Component
   @Aspect
-  public class UserProxy {}
+  public class CalculatorAopProxy {}
   ```
 
 #### 4.在 spring 配置文件中开启生成代理对象
@@ -2076,40 +2176,138 @@
 * 在增强类的里面，在作为通知方法上面添加通知类型注解，使用切入点表达式配置
 
   * ```java
+    /*
+     * 切入点表达式的写法；
+     * 固定格式： execution(访问权限符  返回值类型  方法全类名(参数表))
+     *   
+     * 通配符：
+     * 		*：
+     * 			1）匹配一个或者多个字符:execution(public int com.atguigu.impl.MyMath*r.*(int, int))
+     * 			2）匹配任意一个参数：第一个是int类型，第二个参数任意类型；（匹配两个参数）
+     * 				execution(public int com.atguigu.impl.MyMath*.*(int, *))
+     * 			3）只能匹配一层路径
+     * 			4）权限位置*不能；权限位置不写就行；public【可选的】
+     * 		..：
+     * 			1）匹配任意多个参数，任意类型参数
+     * 			2）匹配任意多层路径:
+     * 				execution(public int com.atguigu..MyMath*.*(..));
+     * 
+     * 记住两种；
+     * 最精确的：execution(public int com.atguigu.impl.MyMathCalculator.add(int,int))
+     * 最模糊的：execution(* *.*(..))：千万别写；
+     * 
+     * &&”、“||”、“!
+     * 
+     * &&：我们要切入的位置满足这两个表达式
+     * 	MyMathCalculator.add(int,double)
+     * execution(public int com.atguigu..MyMath*.*(..))&&execution(* *.*(int,int))
+     * 
+     * 
+     * ||:满足任意一个表达式即可
+     * execution(public int com.atguigu..MyMath*.*(..))&&execution(* *.*(int,int))
+     * 
+     * !：只要不是这个位置都切入
+     * !execution(public int com.atguigu..MyMath*.*(..))
+     * 
+     * 告诉Spring这个result用来接收返回值：
+     * 	returning="result"；
+     * 
+     * 我们可以在通知方法运行的时候，拿到目标方法的详细信息
+     * 1）只需要为通知方法的参数列表上写一个参数：
+     *      JoinPoint joinPoint：封装了当前目标方法的详细信息
+     * 2）告诉Spring哪个参数是用来接收异常
+     *      throwing="exception"：告诉Spring哪个参数是用来接收异常
+     * 3）Exception exception:指定通知方法可以接收哪些异常
+     * 
+     */
     @Component
     @Aspect
-    public class UserProxy {
-        //前置通知
-        //@Before注解表示前置通知
-        @Before(value = "execution(* pers.aop_annotation.User.add(..))")
-        public void before() {
-            System.out.println("before...");
+    public class CalculatorAopProxy {
+        @Before("execution(* pers.spring4.day03.n2_aop.bean.CalculatorImpl.*(..))")
+        public void before(JoinPoint joinPoint){
+            System.out.println("前置通知: " + joinPoint);
         }
     
-        //后置通知（返回通知）
-        @AfterReturning(value = "execution(* pers.aop_annotation.User.add(..))")
-        public void afterReturning() {
-            System.out.println("afterReturning.........");
+        @AfterReturning(value = "execution(* pers.spring4.day03.n2_aop.bean.CalculatorImpl.*(..))",returning = "result")
+        public void afterRunning(JoinPoint joinPoint,Object result){
+            System.out.println("返回通知: " + joinPoint + ",result: " + result);
         }
     
-        //最终通知
-        @After(value = "execution(* pers.aop_annotation.User.add(..))")
-        public void after() {
-            System.out.println("after.........");
+        @After("execution(* pers.spring4.day03.n2_aop.bean.CalculatorImpl.*(..))")
+        public void after(JoinPoint joinPoint){
+            System.out.println("后置通知: " + joinPoint);
         }
     
-        //异常通知
-        @AfterThrowing(value = "execution(* pers.aop_annotation.User.add(..))")
-        public void afterThrowing() {
-            System.out.println("afterThrowing.........");
+        @AfterThrowing(value = "execution(* pers.spring4.day03.n2_aop.bean.CalculatorImpl.*(..))",throwing = "exception")
+        public void afterThrowing(JoinPoint joinPoint,Exception exception){
+            System.out.println("异常通知: " + joinPoint + ",exception: " + exception.getMessage());
         }
-        //环绕通知
-        @Around(value = "execution(* pers.aop_annotation.User.add(..))")
-        public void around(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
-            System.out.println("环绕之前.........");
-            //被增强的方法执行
-            proceedingJoinPoint.proceed();
-            System.out.println("环绕之后.........");
+    
+        /**
+    	 * @throws Throwable 
+    	 * @Around：环绕	:是Spring中强大的通知；
+    	 * @Around：环绕:动态代理；
+    	 * 	try{
+    	 * 			//前置通知
+    	 * 			method.invoke(obj,args);
+    	 * 			//返回通知
+    	 * 	}catch(e){
+    	 * 			//异常通知
+    	 *  }finally{
+    	 * 			//后置通知
+    	 * 	}
+    	 * 		
+    	 * 	四合一通知就是环绕通知；
+    	 * 	环绕通知中有一个参数：	ProceedingJoinPoint pjp
+    	 * 
+    	 *环绕通知：是优先于普通通知执行，执行顺序；
+    	 *
+    	 *[普通前置]
+    	 *{
+    	 *	try{
+    	 *		环绕前置
+    	 *		环绕执行：目标方法执行
+    	 *		环绕返回
+    	 *	}catch(){
+    	 *		环绕出现异常
+    	 *	}finally{
+    	 *		环绕后置
+    	 *	}
+    	 *}
+    	 *
+    	 *
+    	 *[普通后置]
+    	 *[普通方法返回/方法异常]
+    	 *新的顺序：
+    	 *		（环绕前置---普通前置）----目标方法执行----环绕正常返回/出现异常-----环绕后置----普通后置---普通返回或者异常
+    	 *注意：
+    	 */
+        @Around("execution(* pers.spring4.day03.n2_aop.bean.CalculatorImpl.*(..))")
+        public Object around(ProceedingJoinPoint pjp) throws Throwable{
+            //获取调用目标方法时传入的参数
+            Object[] args = pjp.getArgs();
+            //获取目标方法名
+            String methodName = pjp.getSignature().getName();
+    
+            Object proceed = null;
+            try {
+                System.out.println("环绕前置通知: " + methodName + "方法开始");
+    
+                //利用反射调用目标方法:method.invoke(obj,args)
+                proceed = pjp.proceed(args);
+    
+                System.out.println("环绕返回通知: " + methodName + "方法返回");
+            } catch (Exception e) {
+                System.out.println("环绕异常通知: " + methodName + "方法异常: " + e.getMessage());
+    
+                //为了让外界能知道这个异常，这个异常一定抛出去
+                throw new RuntimeException(e);
+            }finally{
+                System.out.println("环绕后置通知: " + methodName + "方法结束");
+            }
+    
+            //调用方法后的返回值需要返回出去
+            return proceed;
         }
     }
     ```
