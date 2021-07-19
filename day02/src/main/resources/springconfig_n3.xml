@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+    <bean id="emp1" class="pers.spring4.day02.n3_spel.bean.Employee">
+        <property name="empId" value="1001"/>
+        <property name="empName" value="Kate"/>
+        <property name="age" value="21"/>
+        <property name="dept" value="#{dept}"/>
+        <property name="deptName" value="#{dept.deptName}"/>
+    </bean>
+    <bean id="dept" class="pers.spring4.day02.n3_spel.bean.Department">
+        <property name="deptName" value="HR"/>
+    </bean>
+
+    <bean id="emp2" class="pers.spring4.day02.n3_spel.bean.Employee">
+        <!--调用非静态方法-->
+        <property name="salaryOfYear" value="#{salaryGenerator.getSalaryOfYear(5000)}"/>
+    </bean>
+    <bean id="salaryGenerator" class="pers.spring4.day02.n3_spel.bean.SalaryGenerator"/>
+
+    <bean id="emp3" class="pers.spring4.day02.n3_spel.bean.Employee">
+        <!--调用静态方法-->
+        <property name="circle" value="#{T(java.lang.Math).PI*20}"/>
+    </bean>
+</beans>

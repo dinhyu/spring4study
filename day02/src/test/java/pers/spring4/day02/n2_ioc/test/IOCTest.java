@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import pers.spring4.day02.n2_ioc.bean.Employee;
 import pers.spring4.day02.n2_ioc.bean.Manager;
 
 /**
@@ -19,5 +20,12 @@ public class IOCTest {
         System.out.println(manager);
         ((ClassPathXmlApplicationContext)applicationContext).close();
         Assert.assertNotNull(manager);
+    }
+
+    @Test
+    public void testAutowire(){
+        Employee employee = applicationContext.getBean("employee", Employee.class);
+        System.out.println(employee);
+        Assert.assertNotNull(employee);
     }
 }
