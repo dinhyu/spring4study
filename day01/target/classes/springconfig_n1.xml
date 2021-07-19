@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--通过bean的set方法赋值-->
+    <bean id="student" class="pers.spring4.day01.n1_helloworld.Student">
+
+        <property name="studentId" value="1"/>
+        <property name="stuName" value="vivy"/>
+        <property name="age" value="100"/>
+        <property name="teacher" ref="teacher"/>
+
+        <!--null值-->
+        <!--<property name="studentId">-->
+            <!--<null/>-->
+        <!--</property>-->
+
+        <!--属性值包含特殊符号
+            1.把<>进行转义:&lt; &gt;
+            2.使用CDATA
+        -->
+        <!--<property name="stuName">-->
+            <!--<value><![CDATA[<<Vivy>>]]></value>-->
+        <!--</property>-->
+
+    </bean>
+
+    <!--通过bean的构造器赋值-->
+    <!--<bean id="student" class="pers.spring4.n1_helloworld.Student">-->
+        <!--默认按构造器形参顺序赋值-->
+        <!--<constructor-arg value="1"/>-->
+        <!--<constructor-arg value="vivy"/>-->
+        <!--<constructor-arg value="100"/>-->
+
+        <!--通过索引值指定参数位置-->
+        <!--<constructor-arg index="0" value="1"/>-->
+        <!--<constructor-arg index="2" value="100"/>-->
+        <!--<constructor-arg index="1" value="vivy"/>-->
+
+        <!--通过参数名指定参数位置-->
+        <!--<constructor-arg name="studentId" value="1"/>-->
+        <!--<constructor-arg name="stuName" value="vivy"/>-->
+        <!--<constructor-arg name="age" value="100"/>-->
+
+        <!--通过类型不同区分重载的构造器-->
+        <!--<constructor-arg index="0" value="1" type="java.lang.Integer"/>-->
+        <!--<constructor-arg index="2" value="100"  type="int"/>-->
+        <!--<constructor-arg index="1" value="123"  type="java.lang.String"/>-->
+
+        <!--给bean的级联属性赋值-->
+        <!--<property name="teacher" ref="teacher"/>-->
+        <!--<property name="teacher.teaName" value="John"/>-->
+    <!--</bean>-->
+
+    <!--p名称空间注入-->
+    <!--<bean id="student" class="pers.spring4.n1_helloworld.Student"-->
+          <!--p:studentId="1" p:stuName="vivy" p:age="100" p:teacher-ref="teacher"-->
+    <!--/>-->
+    <bean id="teacher" class="pers.spring4.day01.n1_helloworld.Teacher"></bean>
+
+
+
+</beans>

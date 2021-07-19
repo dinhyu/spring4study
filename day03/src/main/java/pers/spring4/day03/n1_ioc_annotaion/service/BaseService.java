@@ -13,5 +13,4 @@ public class BaseService<T> {
 		System.out.println("自动注入的dao："+baseDao);
 		baseDao.save();
 	}
-
 }

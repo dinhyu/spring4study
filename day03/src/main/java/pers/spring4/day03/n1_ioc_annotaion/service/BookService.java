@@ -6,5 +6,4 @@ import pers.spring4.day03.n1_ioc_annotaion.bean.Book;
 
 
 @Service
-public class BookService extends BaseService<Book>{
-}
+public class BookService extends BaseService<Book>{}

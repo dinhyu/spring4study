@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <bean id="manager" class="pers.spring4.day02.n2_ioc.bean.Manager" init-method="initMethod" destroy-method="destroyMethod">
+        <property name="mname" value="vivy"/>
+    </bean>
+    <bean id="managerBeanPost" class="pers.spring4.day02.n2_ioc.bean.MyBeanPost"/>
+
+    <bean id="employee" class="pers.spring4.day02.n2_ioc.bean.Employee" autowire="byName"/>
+    <bean id="department" class="pers.spring4.day02.n2_ioc.bean.Department">
+        <property name="depName" value="HR"/>
+    </bean>
+</beans>
