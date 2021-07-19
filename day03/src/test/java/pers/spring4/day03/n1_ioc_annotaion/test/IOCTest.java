@@ -45,5 +45,7 @@ public class IOCTest {
 		//	  2、放行这个方法，看控制台,看debug的每一个变量的变化
 		//    3、看方法注释；
 		//  学到的一点：1）、规范注释，   2）、规范方法名和类名;
+
+		((ClassPathXmlApplicationContext)ioc).close();
 	}
 }
