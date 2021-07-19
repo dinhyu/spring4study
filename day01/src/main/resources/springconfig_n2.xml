@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="userService" class="pers.spring4.day01.n2_ioc.service.UserServiceImpl">
+        <!--set方法注入属性
+            name:类中属性名
+            ref:外部bean标签id值
+        -->
+        <property name="userDao" ref="userDao"/>
+    </bean>
+    <!--外部bean-->
+    <bean id="userDao" class="pers.spring4.day01.n2_ioc.dao.UserDaoImpl"/>
+
+    <bean id="emp" class="pers.spring4.day01.n2_ioc.bean.Emp">
+        <property name="ename" value="vivy"/>
+        <property name="gender" value="female"/>
+        <property name="dept">
+            <!--内部bean-->
+            <bean class="pers.spring4.day01.n2_ioc.bean.Dept">
+                <property name="dname" value="security"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="shop" class="pers.spring4.day01.n2_ioc.bean.Shop">
+        <property name="courses">
+            <array>
+                <value>java</value>
+                <value>database</value>
+            </array>
+        </property>
+        <property name="categoryList">
+            <list>
+                <value>programming</value>
+                <value>cooking</value>
+            </list>
+        </property>
+        <property name="bookMap">
+            <map>
+                <entry>
+                    <key>
+                        <value>bookKey01</value>
+                    </key>
+                    <ref bean="book1"/>
+                </entry>
+                <entry>
+                    <key>
+                        <value>bookKey02</value>
+                    </key>
+                    <ref bean="book2"/>
+                </entry>
+            </map>
+        </property>
+        <property name="prop">
+            <props>
+                <prop key="userName">root</prop>
+                <prop key="password">root</prop>
+                <prop key="url">jdbc:mysql:///test</prop>
+                <prop key="driverClass">com.mysql.jdbc.Driver</prop>
+            </props>
+        </property>
+    </bean>
+    <bean id="book1" class="pers.spring4.day01.n2_ioc.bean.Book" p:bookName="JavaBasic"/>
+    <bean id="book2" class="pers.spring4.day01.n2_ioc.bean.Book" p:bookName="CSharpBasic"/>
+
+
+</beans>
