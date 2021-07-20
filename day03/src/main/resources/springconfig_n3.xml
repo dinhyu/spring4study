@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                            http://www.springframework.org/schema/beans/spring-beans.xsd 
+                            http://www.springframework.org/schema/context 
+                            http://www.springframework.org/schema/context/spring-context.xsd 
+                            http://www.springframework.org/schema/aop 
+                            http://www.springframework.org/schema/aop/spring-aop.xsd">
+    <!-- 创建Bean对象 -->
+    <bean id="book" class="pers.spring4.day03.n3_aopxml.bean.Book"/>
+    <bean id="bookProxy" class="pers.spring4.day03.n3_aopxml.proxy.BookProxy"/>
+
+    <!-- 配置Aop -->
+    <aop:config>
+        <!-- 配置切入点:指定被增强类的方法,所有切面都能用 -->
+        <aop:pointcut id="book_show1" expression="execution(* pers.spring4.day03.n3_aopxml.bean.Book.show())" />
+        <!--配置切面:指定增强类-->
+        <aop:aspect ref="bookProxy">
+            <!-- 配置切入点:指定被增强类的方法,仅当前切面能用 -->
+            <aop:pointcut id="book_show2" expression="execution(* pers.spring4.day03.n3_aopxml.bean.Book.show())" />
+            <!--配置增强类的指定方法作用的切入点-->
+            <!-- 前置通知 -->
+            <aop:before method="before" pointcut-ref="book_show1" />
+            <!-- 返回通知 -->
+            <aop:after-returning method="afterReturning" pointcut-ref="book_show2" returning="result" />
+            <!-- 异常通知 -->
+            <aop:after-throwing method="afterThrowing" pointcut-ref="book_show2" throwing="exception" />
+            <!-- 后置通知 -->
+            <aop:after method="after" pointcut-ref="book_show2" />
+
+            <!-- 环绕通知 -->
+            <aop:around method="around" pointcut-ref="book_show2" />
+        </aop:aspect>
+    </aop:config>
+</beans>

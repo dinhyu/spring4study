@@ -8,6 +8,7 @@ import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 /*
  * 切入点表达式的写法；
@@ -56,7 +57,11 @@ import org.springframework.stereotype.Component;
 @Component
 @Aspect
 public class CalculatorAopProxy {
-    @Before("execution(* pers.spring4.day03.n2_aop.bean.CalculatorImpl.*(..))")
+    //相同切入点抽取
+    @Pointcut(value = "execution(* pers.spring4.day03.n2_aop.bean.CalculatorImpl.*(..))")
+    public void point(){}
+
+    @Before(value = "point()")
     public void before(JoinPoint joinPoint){
         System.out.println("前置通知: " + joinPoint);
     }
@@ -115,7 +120,7 @@ public class CalculatorAopProxy {
 	 *		（环绕前置---普通前置）----目标方法执行----环绕正常返回/出现异常-----环绕后置----普通后置---普通返回或者异常
 	 *注意：
 	 */
-    @Around("execution(* pers.spring4.day03.n2_aop.bean.CalculatorImpl.*(..))")
+    @Around(value = "point()")
     public Object around(ProceedingJoinPoint pjp) throws Throwable{
         //获取调用目标方法时传入的参数
         Object[] args = pjp.getArgs();

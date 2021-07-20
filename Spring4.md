@@ -2317,15 +2317,18 @@
 * ```java
   @Component
   @Aspect
-  public class UserProxy {
+  public class CalculatorAopProxy {
       //相同切入点抽取
-      @Pointcut(value = "execution(* pers.aop_annotation.User.add(..))")
-      public void pointDemo(){}
+      //通过@Pointcut注解将一个切入点声明成简单的方法
+      //切入点的方法体通常是空的，因为将切入点定义与应用程序逻辑混在一起是不合理的
+      @Pointcut(value = "execution(* pers.spring4.day03.n2_aop.bean.CalculatorImpl.*(..))")
+      public void point(){}
   
-      //前置通知
-      //@Before注解表示前置通知
-      @Before(value = "pointDemo")
-      public void before() {
+      //其他通知可以通过方法名称引入该切入点
+      @Before(value = "point()")
+      public void before(JoinPoint joinPoint){
+          System.out.println("前置通知: " + joinPoint);
+      }
   }
   ```
 
@@ -2353,20 +2356,21 @@
 
   * ```java
     //配置类
-    @Configuration
-    @ComponentScan(basePackages = {"com.atguigu"})
-    @EnableAspectJAutoProxy(proxyTargetClass = true)
-    public class ConfigAop {
-    }
+    @Configuration//标识为配置类
+    @ComponentScan(basePackages = {"pers.spring4.day03.n2_aop"})//开启包扫描
+    @EnableAspectJAutoProxy(proxyTargetClass = true)//开启基于注解的AOP功能,允许代理对象使用被代理接口的子类承接
+    public class ConfigAop {}
     ```
-
+    
   * ```java
     //测试使用
     @Test
-    public void testAopAnnoWithoutSpringXml(){
-        ApplicationContext context = new AnnotationConfigApplicationContext(SpringConfig.class);
-        User user = context.getBean("user", User.class);
-        user.add();
+    public void testAopAnnoWithoutXml(){
+        //完全注解开发使用AnnotationConfigApplicationContext读取配置类的class类对象
+        ApplicationContext applicationContext = new AnnotationConfigApplicationContext(ConfigAop.class);
+        Calculator calculator = applicationContext.getBean(Calculator.class);
+        Double sum = calculator.getSum(1.0,2.0);
+        System.out.println("testAop:" + sum);
     }
     ```
 
@@ -2443,6 +2447,20 @@
         </aop:config>
     </beans>
     ```
+    
+  * 配置细节
+  
+    * 所有的Spring AOP配置都必须定义在`<aop:config>`元素内部
+    * 对于每个切面而言，都要创建一个`<aop:aspect>`元素来为具体的切面实现引用后端bean实例
+    * 切面bean必须有一个标识符，供`<aop:aspect>`元素引用
+    * 声明切入点
+      * 切入点使用`<aop:pointcut>`元素声明
+      * 切入点必须定义在`<aop:aspect>`元素下(只对当前切面有效)，或者直接定义在`<aop:config>`元素下(对所有切面都有效)
+      * 基于XML的AOP配置不允许在切入点表达式中用名称引用其他切入点
+    * 声明通知
+      * 在aop名称空间中，每种通知类型都对应一个特定的XML元素
+      * 通知元素需要使用`<pointcut-ref>`来引用切入点，或用`<pointcut>`直接嵌入切入点表达式
+      * method属性指定切面类中通知方法的名称
 
 # JdbcTemplate
 
